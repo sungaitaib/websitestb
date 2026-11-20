@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Desa Sungai Taib — Portofolio & Sistem Pendataan Warga</title>
+  <!-- Memuat Tailwind CSS via CDN untuk tata letak responsif -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Memuat Font Inter dari Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    // Konfigurasi Tailwind dasar dengan variabel CSS kustom agar tema biru bisa diubah secara dinamis
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: 'var(--brand-50, #eff6ff)',
+              100: 'var(--brand-100, #dbeafe)',
+              200: 'var(--brand-200, #bfdbfe)',
+              500: 'var(--brand-500, #3b82f6)',
+              600: 'var(--brand-600, #2563eb)',
+              700: 'var(--brand-700, #1d4ed8)',
+              800: 'var(--brand-800, #1e40af)',
+              900: 'var(--brand-900, #1e3a8a)',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    :root {
+      --brand-50: #eff6ff;
+      --brand-100: #dbeafe;
+      --brand-200: #bfdbfe;
+      --brand-500: #3b82f6;
+      --brand-600: #2563eb;
+      --brand-700: #1d4ed8;
+      --brand-800: #1e40af;
+      --brand-900: #1e3a8a;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      overflow-x: hidden;
+    }
+
+    /* Efek pola gelombang lembut biru-putih pada hero */
+    .hero-pattern {
+      background-image:
+        radial-gradient(at 85% 15%, rgba(255, 255, 255, 0.18) 0px, transparent 50%),
+        radial-gradient(at 15% 85%, rgba(147, 197, 253, 0.25) 0px, transparent 50%);
+    }
+
+    /* Transisi halus untuk tab dan modal */
+    .fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Custom scrollbar rapi */
+    ::-webkit-scrollbar {
+      width: 7px;
+      height: 7px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-slate-50 text-slate-800">
+
+  <!-- Toast / Notifikasi Melayang (Pengganti alert) -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm w-full px-4 sm:px-0 pointer-events-none"></div>
+
+  <!-- Header & Navigasi Utama -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-blue-100 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-wrap items-center justify-between py-3 gap-3">
+        <!-- Identitas Desa -->
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 rounded-2xl bg-brand-600 text-white flex items-center justify-center shadow-md shadow-brand-600/20 shrink-0">
+            <!-- Ikon Rumah & Komunitas SVG -->
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <h1 id="header-village-name" class="text-base sm:text-lg font-bold text-slate-900 truncate">Desa Sungai Taib</h1>
+              <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-200">
+                Portal Pendataan
+              </span>
+            </div>
+            <p id="header-village-address" class="text-xs text-slate-500 truncate">Jl. Kaca Piring RT. 01 Dusun I</p>
+          </div>
+        </div>
+
+        <!-- Tombol Navigasi Tab -->
+        <nav class="flex items-center gap-1 sm:gap-2 bg-slate-100 p-1 rounded-2xl w-full sm:w-auto justify-between sm:justify-start">
+          <button type="button" data-tab="beranda" onclick="switchTab('beranda')"
+            class="nav-btn flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 bg-brand-600 text-white shadow-sm">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+            </svg>
+            <span>Beranda</span>
+          </button>
+
+          <button type="button" data-tab="pendataan" onclick="switchTab('pendataan')"
+            class="nav-btn flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-brand-700 hover:bg-white">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Pendataan</span>
+          </button>
+
+          <button type="button" data-tab="pengaturan" onclick="switchTab('pengaturan')"
+            class="nav-btn flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-1.5 text-slate-600 hover:text-brand-700 hover:bg-white">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            <span>Pengaturan</span>
+          </button>
+        </nav>
+
+        <!-- Tombol WhatsApp Layanan Cepat -->
+        <a id="wa-header-btn" href="https://wa.me/6281959793678" target="_blank" rel="noopener noreferrer"
+          class="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold shadow-sm transition-all">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.453 3.484 1.328 5.016l-1.391 5.078 5.203-1.359c1.469.797 3.109 1.219 4.828 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-9.985-9.969-9.985zm5.828 14.125c-.25.703-1.438 1.344-1.984 1.422-.516.078-1.172.109-1.891-.125-.438-.141-1-.328-1.719-.641-3.016-1.297-4.984-4.328-5.141-4.531-.156-.203-1.234-1.641-1.234-3.125s.781-2.219 1.063-2.516c.281-.297.609-.375.813-.375s.406.016.594.016c.188 0 .453-.078.703.531.266.625.891 2.172.969 2.328.078.156.125.344.031.547-.094.203-.141.328-.281.5-.141.172-.297.391-.422.516-.141.141-.297.297-.125.594.172.297.766 1.266 1.641 2.047 1.125 1 2.078 1.313 2.375 1.453.297.141.469.125.641-.078.172-.203.734-.859.938-1.156.203-.297.391-.25.672-.141.281.109 1.781.844 2.094 1 .313.156.516.234.594.359.078.141.078.781-.172 1.484z" />
+          </svg>
+          <span id="wa-header-label">WA: 081959793678</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Konten Utama -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+    <!-- Banner Portofolio Profil Desa (Selalu terlihat atau fokus di Beranda, tetap informatif) -->
+    <section id="hero-banner" class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-800 via-brand-700 to-brand-500 text-white shadow-xl hero-pattern">
+      <div class="p-6 sm:p-8 lg:p-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        <div class="lg:col-span-8 space-y-3">
+          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-sm text-xs font-medium text-brand-50">
+            <span class="w-2 h-2 rounded-full bg-emerald-300 animate-pulse"></span>
+            <span>Portofolio & Administrasi Kependudukan Digital</span>
+          </div>
+          <h2 id="hero-title" class="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight leading-tight">
+            Profil & Pendataan Warga Desa Sungai Taib
+          </h2>
+          <p id="hero-desc" class="text-sm sm:text-base text-blue-100 max-w-2xl leading-relaxed">
+            Sistem informasi warga yang transparan, terstruktur, dan mudah disesuaikan untuk mendukung pelayanan administrasi, mutasi warga pindah, serta pembangunan lingkungan yang tertib dan akurat.
+          </p>
+
+          <div class="pt-2 flex flex-wrap items-center gap-3 text-xs sm:text-sm text-blue-50">
+            <div class="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl backdrop-blur-sm">
+              <svg class="w-4 h-4 text-blue-200 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span id="hero-address">Jl. Kaca Piring RT. 01 Dusun I</span>
+            </div>
+
+            <a id="wa-hero-btn" href="https://wa.me/6281959793678" target="_blank" rel="noopener noreferrer"
+              class="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-semibold px-4 py-2 rounded-xl shadow-md transition-all">
+              <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 2c-5.516 0-9.969 4.453-9.969 9.969 0 1.766.453 3.484 1.328 5.016l-1.391 5.078 5.203-1.359c1.469.797 3.109 1.219 4.828 1.219 5.516 0 9.969-4.453 9.969-9.969s-4.453-9.985-9.969-9.985zm5.828 14.125c-.25.703-1.438 1.344-1.984 1.422-.516.078-1.172.109-1.891-.125-.438-.141-1-.328-1.719-.641-3.016-1.297-4.984-4.328-5.141-4.531-.156-.203-1.234-1.641-1.234-3.125s.781-2.219 1.063-2.516c.281-.297.609-.375.813-.375s.406.016.594.016c.188 0 .453-.078.703.531.266.625.891 2.172.969 2.328.078.156.125.344.031.547-.094.203-.141.328-.281.5-.141.172-.297.391-.422.516-.141.141-.297.297-.125.594.172.297.766 1.266 1.641 2.047 1.125 1 2.078 1.313 2.375 1.453.297.141.469.125.641-.078.172-.203.734-.859.938-1.156.203-.297.391-.25.672-.141.281.109 1.781.844 2.094 1 .313.156.516.234.594.359.078.141.078.781-.172 1.484z" />
+              </svg>
+              <span id="wa-hero-label">WhatsApp: 081959793678</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Kartu Ringkasan Portofolio Cepat di Sisi Kanan -->
+        <div class="lg:col-span-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-5 space-y-3">
+          <div class="flex items-center justify-between border-b border-white/15 pb-2.5">
+            <span class="text-xs uppercase tracking-wider font-semibold text-blue-100">Ringkasan Layanan</span>
+            <span class="text-xs bg-white text-brand-800 font-bold px-2.5 py-0.5 rounded-full">Aktif</span>
+          </div>
+          <ul id="portofolio-highlights" class="space-y-2 text-xs sm:text-sm text-blue-50">
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-200"></span>
+              <span>Pendataan warga baru & mutasi domisili</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-200"></span>
+              <span>Pencatatan warga pindah secara rapi</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-200"></span>
+              <span>Layanan pengaduan & info via WhatsApp</span>
+            </li>
+            <li class="flex items-center gap-2">
+              <span class="w-1.5 h-1.5 rounded-full bg-blue-200"></span>
+              <span>Pengaturan RT, kategori & warna fleksibel</span>
+            </li>
+          </ul>
+          <div class="pt-2 flex gap-2">
+            <button type="button" onclick="switchTab('pendataan')"
+              class="w-full py-2.5 px-4 rounded-xl bg-white text-brand-800 hover:bg-blue-50 font-bold text-xs sm:text-sm transition shadow-sm">
+              Kelola Data Warga →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Kartu Statistik Real-Time -->
+    <section aria-label="Statistik Warga" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500">Total Warga Aktif</span>
+          <div class="w-9 h-9 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+        </div>
+        <div id="stat-total-warga" class="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900">0</div>
+        <p class="mt-1 text-xs text-brand-700 font-medium">Terdata di sistem desa</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500">Kepala Keluarga</span>
+          <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+            </svg>
+          </div>
+        </div>
+        <div id="stat-kepala-keluarga" class="mt-3 text-2xl sm:text-3xl font-extrabold text-slate-900">0</div>
+        <p class="mt-1 text-xs text-slate-500">KK berdomisili aktif</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500">Laki-laki / Perempuan</span>
+          <div class="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          </div>
+        </div>
+        <div id="stat-gender" class="mt-3 text-xl sm:text-2xl font-extrabold text-slate-900">0 / 0</div>
+        <p class="mt-1 text-xs text-slate-500">Komposisi gender aktif</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-4 sm:p-5 border border-blue-100 shadow-sm hover:shadow-md transition">
+        <div class="flex items-center justify-between">
+          <span class="text-xs sm:text-sm font-medium text-slate-500">Warga Pindah</span>
+          <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </div>
+        </div>
+        <div id="stat-warga-pindah" class="mt-3 text-2xl sm:text-3xl font-extrabold text-amber-600">0</div>
+        <p class="mt-1 text-xs text-slate-500">Tercatat di riwayat pindah</p>
+      </div>
+    </section>
+
+    <!-- TAB 1: BERANDA / PORTOFOLIO DESA -->
+    <div id="tab-beranda" class="tab-content space-y-6 fade-in">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Profil & Potensi Desa -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-7 border border-blue-100 shadow-sm space-y-5">
+          <div class="flex items-center justify-between flex-wrap gap-2">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Portofolio Desa</span>
+              <h3 id="profil-heading" class="text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">Tentang Desa Sungai Taib</h3>
+            </div>
+            <button type="button" onclick="switchTab('pengaturan')"
+              class="text-xs font-semibold text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-xl transition">
+              Edit Profil Desa
+            </button>
+          </div>
+
+          <p id="profil-about" class="text-sm sm:text-base text-slate-600 leading-relaxed">
+            Desa Sungai Taib mengutamakan ketertiban administrasi kependudukan berbasis data akurat. Melalui portal pendataan ini, perangkat desa dan pengurus lingkungan dapat mencatat warga baru, memperbarui status keluarga, serta mencatat warga yang pindah domisili secara cepat dan terarsip.
+          </p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+            <div class="p-4 rounded-2xl bg-brand-50/70 border border-brand-100">
+              <h4 class="font-bold text-brand-900 text-sm mb-1">Alamat Sekretariat / Posko</h4>
+              <p id="profil-address" class="text-xs sm:text-sm text-slate-700">Jl. Kaca Piring RT. 01 Dusun I</p>
+            </div>
+            <div class="p-4 rounded-2xl bg-brand-50/70 border border-brand-100">
+              <h4 class="font-bold text-brand-900 text-sm mb-1">Kontak Layanan WhatsApp</h4>
+              <p id="profil-wa" class="text-xs sm:text-sm text-slate-700 font-semibold">081959793678</p>
+            </div>
+          </div>
+
+          <!-- Sebaran Per RT/Dusun -->
+          <div class="pt-2">
+            <h4 class="text-sm font-bold text-slate-800 mb-3">Sebaran Warga Aktif per Wilayah (RT / Dusun)</h4>
+            <div id="rt-distribution-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+
+        <!-- Kartu Aksi Cepat & Layanan Warga -->
+        <div class="bg-white rounded-3xl p-6 sm:p-7 border border-blue-100 shadow-sm flex flex-col justify-between space-y-5">
+          <div class="space-y-4">
+            <span class="text-xs font-bold uppercase tracking-wider text-brand-600">Aksi Cepat</span>
+            <h3 class="text-xl font-bold text-slate-900">Kelola Pendataan Warga</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              Tambahkan warga yang baru menetap atau tandai warga yang telah pindah domisili agar data kependudukan tetap mutakhir.
+            </p>
+
+            <div class="space-y-3 pt-1">
+              <button type="button" onclick="switchTab('pendataan'); focusInputNik();"
+                class="w-full py-3 px-4 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                <span>Input Warga Baru</span>
+              </button>
+
+              <button type="button" onclick="switchTab('pendataan')"
+                class="w-full py-3 px-4 rounded-2xl bg-brand-50 hover:bg-brand-100 text-brand-800 font-semibold text-sm transition flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <span>Lihat & Kelola Tabel Warga</span>
+              </button>
+
+              <a id="wa-card-btn" href="https://wa.me/6281959793678?text=Halo%20Admin%20Desa%20Sungai%20Taib%2C%20saya%20ingin%20bertanya%20terkait%20pendataan%20warga."
+                target="_blank" rel="noopener noreferrer"
+                class="w-full py-3 px-4 rounded-2xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-sm transition flex items-center justify-center gap-2">
+                <span>Hubungi Admin WhatsApp</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 text-xs text-slate-500">
+            Data tersimpan otomatis di browser Anda (<span class="font-semibold text-slate-700">LocalStorage</span>) dan dapat diunduh kapan saja sebagai cadangan JSON/CSV.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: PENDATAAN WARGA (INPUT BARU, TABEL AKTIF, RIWAYAT PINDAH) -->
+    <div id="tab-pendataan" class="tab-content hidden space-y-6 fade-in">
+      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+
+        <!-- Form Input Warga Baru -->
+        <div class="xl:col-span-4 bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-sm">
+          <div class="flex items-center gap-2.5 mb-4">
+            <div class="w-9 h-9 rounded-xl bg-brand-600 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base sm:text-lg font-bold text-slate-900">Input Data Warga Baru</h3>
+              <p class="text-xs text-slate-500">Lengkapi formulir di bawah ini</p>
+            </div>
+          </div>
+
+          <form id="form-warga-baru" onsubmit="handleAddWarga(event)" class="space-y-3.5">
+            <div>
+              <label for="input-nik" class="block text-xs font-semibold text-slate-700 mb-1">NIK (16 Digit / No. Identitas)*</label>
+              <input id="input-nik" type="text" required maxlength="20" placeholder="Contoh: 1501012305900001"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+            </div>
+
+            <div>
+              <label for="input-nama" class="block text-xs font-semibold text-slate-700 mb-1">Nama Lengkap*</label>
+              <input id="input-nama" type="text" required placeholder="Contoh: Ahmad Fauzi"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3.5">
+              <div>
+                <label for="input-gender" class="block text-xs font-semibold text-slate-700 mb-1">Jenis Kelamin*</label>
+                <select id="input-gender" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm bg-white transition">
+                  <option value="Laki-laki">Laki-laki</option>
+                  <option value="Perempuan">Perempuan</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="input-tgl-lahir" class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Lahir*</label>
+                <input id="input-tgl-lahir" type="date" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-1 gap-3.5">
+              <div>
+                <label for="input-rt" class="block text-xs font-semibold text-slate-700 mb-1">RT / Dusun*</label>
+                <select id="input-rt" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm bg-white transition">
+                  <!-- Diisi dinamis via JS -->
+                </select>
+              </div>
+
+              <div>
+                <label for="input-status" class="block text-xs font-semibold text-slate-700 mb-1">Status Keluarga / Kategori*</label>
+                <select id="input-status" required
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm bg-white transition">
+                  <!-- Diisi dinamis via JS -->
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label for="input-tgl-masuk" class="block text-xs font-semibold text-slate-700 mb-1">Tanggal Masuk / Terdata*</label>
+              <input id="input-tgl-masuk" type="date" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+            </div>
+
+            <div>
+              <label for="input-keterangan" class="block text-xs font-semibold text-slate-700 mb-1">Keterangan Tambahan (Opsional)</label>
+              <input id="input-keterangan" type="text" placeholder="Contoh: Dekat Masjid / Rumah Kayu"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+            </div>
+
+            <button type="submit"
+              class="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 active:scale-[0.99] text-white font-semibold text-sm shadow-md shadow-brand-600/20 transition flex items-center justify-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span>Simpan Data Warga</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Tabel Data Warga Aktif & Riwayat Warga Pindah -->
+        <div class="xl:col-span-8 space-y-6">
+          <!-- Kartu Tabel Warga Aktif -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-slate-900">Daftar Warga Aktif</h3>
+                <p class="text-xs text-slate-500">Cari nama/NIK, saring per RT/Dusun, atau tandai warga yang pindah</p>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <button type="button" onclick="exportCSV()"
+                  class="px-3 py-2 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-800 text-xs font-semibold transition">
+                  Unduh CSV
+                </button>
+              </div>
+            </div>
+
+            <!-- Filter & Pencarian -->
+            <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+              <div class="sm:col-span-7 relative">
+                <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input id="search-warga" type="text" oninput="renderWargaTable()" placeholder="Cari nama, NIK, atau keterangan..."
+                  class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm transition" />
+              </div>
+
+              <div class="sm:col-span-5">
+                <select id="filter-rt" onchange="renderWargaTable()"
+                  class="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm bg-white transition">
+                  <option value="ALL">Semua RT / Dusun</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Tabel Responsif -->
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/80">
+              <table class="w-full text-left border-collapse min-w-[720px]">
+                <thead>
+                  <tr class="bg-brand-50/80 text-brand-900 text-xs font-bold uppercase tracking-wider border-b border-brand-100">
+                    <th class="py-3 px-4">Warga & NIK</th>
+                    <th class="py-3 px-3">L/P & Lahir</th>
+                    <th class="py-3 px-3">RT / Dusun</th>
+                    <th class="py-3 px-3">Status</th>
+                    <th class="py-3 px-3">Masuk</th>
+                    <th class="py-3 px-4 text-right">Aksi Pindah / Hapus</th>
+                  </tr>
+                </thead>
+                <tbody id="warga-table-body" class="divide-y divide-slate-100 text-sm">
+                  <!-- Diisi dinamis via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="warga-empty-state" class="hidden text-center py-8 text-slate-500 text-sm">
+              Tidak ada data warga aktif yang sesuai dengan pencarian atau filter.
+            </div>
+          </div>
+
+          <!-- Kartu Riwayat Warga Pindah / Terhapus -->
+          <div class="bg-white rounded-3xl p-5 sm:p-6 border border-blue-100 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div>
+                <h3 class="text-base sm:text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>Arsip & Riwayat Warga Pindah</span>
+                  <span id="badge-pindah-count" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">0</span>
+                </h3>
+                <p class="text-xs text-slate-500">Warga yang ditandai pindah akan masuk ke arsip ini, atau dapat dipulihkan / dihapus permanen.</p>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-2xl border border-slate-200/80">
+              <table class="w-full text-left border-collapse min-w-[640px]">
+                <thead>
+                  <tr class="bg-slate-100/80 text-slate-700 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                    <th class="py-3 px-4">Nama & NIK</th>
+                    <th class="py-3 px-3">RT / Dusun Asal</th>
+                    <th class="py-3 px-3">Tujuan / Catatan Pindah</th>
+                    <th class="py-3 px-3">Tgl Pindah</th>
+                    <th class="py-3 px-4 text-right">Kelola Arsip</th>
+                  </tr>
+                </thead>
+                <tbody id="pindah-table-body" class="divide-y divide-slate-100 text-sm">
+                  <!-- Diisi dinamis via JS -->
+                </tbody>
+              </table>
+            </div>
+
+            <div id="pindah-empty-state" class="text-center py-6 text-slate-400 text-xs sm:text-sm">
+              Belum ada data warga pindah yang tercatat.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: PENGATURAN & KUSTOMISASI WEBSITE DESA -->
+    <div id="tab-pengaturan" class="tab-content hidden space-y-6 fade-in">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- Pengaturan Identitas Desa & WhatsApp -->
+        <div class="bg-white rounded-3xl p-6 border border-blue-100 shadow-sm space-y-4">
+          <h3 class="text-lg font-bold text-slate-900">Identitas Desa & Kontak WhatsApp</h3>
+          <p class="text-xs text-slate-500">Ubah informasi profil desa, alamat posko, dan nomor WhatsApp layanan secara langsung.</p>
+
+          <form id="form-settings-desa" onsubmit="handleSaveSettings(event)" class="space-y-4">
+            <div>
+              <label for="set-nama-desa" class="block text-xs font-semibold text-slate-700 mb-1">Nama Desa / Instansi</label>
+              <input id="set-nama-desa" type="text" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+            </div>
+
+            <div>
+              <label for="set-alamat-desa" class="block text-xs font-semibold text-slate-700 mb-1">Alamat Desa / Sekretariat</label>
+              <input id="set-alamat-desa" type="text" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+            </div>
+
+            <div>
+              <label for="set-wa-desa" class="block text-xs font-semibold text-slate-700 mb-1">Nomor WhatsApp Layanan (Format 08... atau 628...)</label>
+              <input id="set-wa-desa" type="text" required
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+            </div>
+
+            <div>
+              <label for="set-deskripsi-desa" class="block text-xs font-semibold text-slate-700 mb-1">Deskripsi Singkat Portofolio Desa</label>
+              <textarea id="set-deskripsi-desa" rows="3"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm"></textarea>
+            </div>
+
+            <div>
+              <label for="set-tema-biru" class="block text-xs font-semibold text-slate-700 mb-1">Nuansa Warna Biru Utama</label>
+              <select id="set-tema-biru" onchange="previewThemeColor(this.value)"
+                class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm bg-white">
+                <option value="royal">Biru Royal (Default — #2563eb)</option>
+                <option value="ocean">Biru Samudra (#0284c7)</option>
+                <option value="navy">Biru Dongker (#1e40af)</option>
+                <option value="indigo">Biru Keunguan (#4f46e5)</option>
+              </select>
+            </div>
+
+            <button type="submit"
+              class="w-full py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-sm shadow-sm transition">
+              Simpan Pengaturan Desa
+            </button>
+          </form>
+        </div>
+
+        <!-- Pengaturan Opsi RT/Dusun, Kategori Status & Backup Data -->
+        <div class="space-y-6">
+          <div class="bg-white rounded-3xl p-6 border border-blue-100 shadow-sm space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">Kelola Daftar RT/Dusun & Status Keluarga</h3>
+            <p class="text-xs text-slate-500">Pisahkan setiap pilihan dengan koma (,). Perubahan langsung muncul di form input warga.</p>
+
+            <div class="space-y-3">
+              <div>
+                <label for="set-daftar-rt" class="block text-xs font-semibold text-slate-700 mb-1">Daftar RT / Dusun</label>
+                <input id="set-daftar-rt" type="text"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+              </div>
+
+              <div>
+                <label for="set-daftar-status" class="block text-xs font-semibold text-slate-700 mb-1">Daftar Status Keluarga / Kategori</label>
+                <input id="set-daftar-status" type="text"
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+              </div>
+
+              <button type="button" onclick="handleSaveLists()"
+                class="w-full py-2.5 px-4 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-800 border border-brand-200 font-semibold text-sm transition">
+                Perbarui Pilihan RT & Status
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-3xl p-6 border border-blue-100 shadow-sm space-y-4">
+            <h3 class="text-lg font-bold text-slate-900">Cadangan Data (JSON) & Reset Bawaan</h3>
+            <p class="text-xs text-slate-500">Ekspor seluruh data ke file JSON, impor kembali dari file JSON, atau kembalikan ke pengaturan awal Desa Sungai Taib.</p>
+
+            <div class="flex flex-wrap gap-2.5">
+              <button type="button" onclick="exportJSON()"
+                class="flex-1 min-w-[130px] py-2.5 px-3.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold text-xs sm:text-sm transition">
+                Ekspor JSON
+              </button>
+
+              <label class="flex-1 min-w-[130px] py-2.5 px-3.5 rounded-xl border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-800 font-semibold text-xs sm:text-sm text-center cursor-pointer transition">
+                <span>Impor JSON</span>
+                <input type="file" accept=".json,application/json" onchange="importJSON(event)" class="hidden" />
+              </label>
+
+              <button type="button" onclick="openResetModal()"
+                class="w-full py-2.5 px-3.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs sm:text-sm transition">
+                Reset Semua ke Data Awal Desa Sungai Taib
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-blue-100 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs sm:text-sm text-slate-500">
+      <div>
+        <span id="footer-village" class="font-semibold text-slate-800">Desa Sungai Taib</span> — <span id="footer-address">Jl. Kaca Piring RT. 01 Dusun I</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <a id="wa-footer-link" href="https://wa.me/6281959793678" target="_blank" rel="noopener noreferrer"
+          class="text-brand-700 hover:underline font-medium">
+          WhatsApp: <span id="footer-wa">081959793678</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modal Konfirmasi Tandai Warga Pindah -->
+  <div id="modal-pindah" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-blue-100 space-y-4 fade-in">
+      <div class="flex items-center justify-between">
+        <h4 class="text-lg font-bold text-slate-900">Tandai Warga Pindah</h4>
+        <button type="button" onclick="closePindahModal()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+      </div>
+      <p class="text-sm text-slate-600">
+        Warga berikut akan dipindahkan dari daftar warga aktif ke arsip warga pindah:
+      </p>
+      <div class="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-sm">
+        <div id="pindah-target-nama" class="font-bold text-slate-900"></div>
+        <div id="pindah-target-nik" class="text-xs text-slate-600 mt-0.5"></div>
+      </div>
+      <div>
+        <label for="pindah-alasan" class="block text-xs font-semibold text-slate-700 mb-1">Alamat Tujuan / Keterangan Pindah</label>
+        <input id="pindah-alasan" type="text" placeholder="Contoh: Pindah ke Kota Jambi / Pindah kerja"
+          class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none text-sm" />
+      </div>
+      <div class="flex justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closePindahModal()"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold">
+          Batal
+        </button>
+        <button type="button" onclick="confirmPindahWarga()"
+          class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold shadow-sm">
+          Ya, Tandai Pindah
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Konfirmasi Reset Data -->
+  <div id="modal-reset" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-rose-100 space-y-4 fade-in">
+      <h4 class="text-lg font-bold text-slate-900">Reset Data ke Bawaan?</h4>
+      <p class="text-sm text-slate-600">
+        Tindakan ini akan mengembalikan profil Desa Sungai Taib, pengaturan, dan data contoh warga ke kondisi awal. Pastikan Anda sudah mengekspor JSON jika ingin menyimpan data saat ini.
+      </p>
+      <div class="flex justify-end gap-2.5 pt-2">
+        <button type="button" onclick="closeResetModal()"
+          class="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold">
+          Batal
+        </button>
+        <button type="button" onclick="confirmResetAll()"
+          class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold shadow-sm">
+          Ya, Reset Sekarang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kunci penyimpanan LocalStorage
+    const STORAGE_KEY_WARGA = 'desa_sungai_taib_warga_v1';
+    const STORAGE_KEY_PINDAH = 'desa_sungai_taib_pindah_v1';
+    const STORAGE_KEY_CONFIG = 'desa_sungai_taib_config_v1';
+
+    // Palet nuansa warna biru yang bisa dipilih pengguna
+    const THEME_PALETTES = {
+      royal: {
+        '--brand-50': '#eff6ff',
+        '--brand-100': '#dbeafe',
+        '--brand-200': '#bfdbfe',
+        '--brand-500': '#3b82f6',
+        '--brand-600': '#2563eb',
+        '--brand-700': '#1d4ed8',
+        '--brand-800': '#1e40af',
+        '--brand-900': '#1e3a8a',
+      },
+      ocean: {
+        '--brand-50': '#f0f9ff',
+        '--brand-100': '#e0f2fe',
+        '--brand-200': '#bae6fd',
+        '--brand-500': '#0ea5e9',
+        '--brand-600': '#0284c7',
+        '--brand-700': '#0369a1',
+        '--brand-800': '#075985',
+        '--brand-900': '#0c4a6e',
+      },
+      navy: {
+        '--brand-50': '#eff6ff',
+        '--brand-100': '#dbeafe',
+        '--brand-200': '#bfdbfe',
+        '--brand-500': '#2563eb',
+        '--brand-600': '#1e40af',
+        '--brand-700': '#1e3a8a',
+        '--brand-800': '#172554',
+        '--brand-900': '#0f172a',
+      },
+      indigo: {
+        '--brand-50': '#eef2ff',
+        '--brand-100': '#e0e7ff',
+        '--brand-200': '#c7d2fe',
+        '--brand-500': '#6366f1',
+        '--brand-600': '#4f46e5',
+        '--brand-700': '#4338ca',
+        '--brand-800': '#3730a3',
+        '--brand-900': '#312e81',
+      }
+    };
+
+    // Konfigurasi default Desa Sungai Taib
+    const DEFAULT_CONFIG = {
+      villageName: 'Desa Sungai Taib',
+      address: 'Jl. Kaca Piring RT. 01 Dusun I',
+      whatsapp: '081959793678',
+      description: 'Sistem informasi warga yang transparan, terstruktur, dan mudah disesuaikan untuk mendukung pelayanan administrasi, mutasi warga pindah, serta pembangunan lingkungan yang tertib dan akurat.',
+      theme: 'royal',
+      rtList: ['RT. 01 Dusun I', 'RT. 02 Dusun I', 'RT. 03 Dusun II', 'RT. 04 Dusun II', 'RT. 05 Dusun III, RT. 06 Dusun III'],
+      statusList: ['Kepala Keluarga', 'Istri', 'Anak', 'Orang Tua / Lansia', 'Famili Lain']
+    };
+
+    // Data awal contoh warga Desa Sungai Taib
+    const DEFAULT_WARGA = [
+      {
+        id: 'w-101',
+        nik: '1501041205780001',
+        nama: 'Hendra Saputra',
+        gender: 'Laki-laki',
+        tglLahir: '1978-05-12',
+        rt: 'RT. 01 Dusun I',
+        status: 'Kepala Keluarga',
+        tglMasuk: '2020-01-15',
+        keterangan: 'Jl. Kaca Piring dekat simpang'
+      },
+      {
+        id: 'w-102',
+        nik: '1501045408820002',
+        nama: 'Siti Rahmah',
+        gender: 'Perempuan',
+        tglLahir: '1982-08-14',
+        rt: 'RT. 01 Dusun I',
+        status: 'Istri',
+        tglMasuk: '2020-01-15',
+        keterangan: 'Jl. Kaca Piring'
+      },
+      {
+        id: 'w-103',
+        nik: '1501041911050003',
+        nama: 'Rizky Pratama',
+        gender: 'Laki-laki',
+        tglLahir: '2005-11-19',
+        rt: 'RT. 01 Dusun I',
+        status: 'Anak',
+        tglMasuk: '2020-01-15',
+        keterangan: 'Pelajar / Mahasiswa'
+      },
+      {
+        id: 'w-104',
+        nik: '1501042103800004',
+        nama: 'Bambang Wijaya',
+        gender: 'Laki-laki',
+        tglLahir: '1980-03-21',
+        rt: 'RT. 02 Dusun I',
+        status: 'Kepala Keluarga',
+        tglMasuk: '2021-06-10',
+        keterangan: 'Lorong Melati'
+      },
+      {
+        id: 'w-105',
+        nik: '1501046007850005',
+        nama: 'Nurul Hidayah',
+        gender: 'Perempuan',
+        tglLahir: '1985-07-20',
+        rt: 'RT. 02 Dusun I',
+        status: 'Istri',
+        tglMasuk: '2021-06-10',
+        keterangan: 'Lorong Melati'
+      },
+      {
+        id: 'w-106',
+        nik: '1501040802750006',
+        nama: 'Zulkifli Hasan',
+        gender: 'Laki-laki',
+        tglLahir: '1975-02-08',
+        rt: 'RT. 03 Dusun II',
+        status: 'Kepala Keluarga',
+        tglMasuk: '2019-11-02',
+        keterangan: 'Arah jembatan baru'
+      }
+    ];
+
+    let config = loadData(STORAGE_KEY_CONFIG, DEFAULT_CONFIG);
+    let wargaAktif = loadData(STORAGE_KEY_WARGA, DEFAULT_WARGA);
+    let wargaPindah = loadData(STORAGE_KEY_PINDAH, []);
+    let pendingPindahId = null;
+
+    // Memuat data dari localStorage dengan aman
+    function loadData(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return structuredClone(fallback);
+        return JSON.parse(raw);
+      } catch (err) {
+        console.error('Gagal memuat data:', err);
+        return structuredClone(fallback);
+      }
+    }
+
+    // Menyimpan data ke localStorage
+    function saveAll() {
+      try {
+        localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
+        localStorage.setItem(STORAGE_KEY_WARGA, JSON.stringify(wargaAktif));
+        localStorage.setItem(STORAGE_KEY_PINDAH, JSON.stringify(wargaPindah));
+      } catch (err) {
+        showToast('Gagal menyimpan data ke penyimpanan lokal.', 'error');
+      }
+    }
+
+    // Format nomor telepon ke format internasional wa.me (62...)
+    function formatWhatsAppUrl(rawPhone, defaultText = '') {
+      let cleaned = (rawPhone || '').replace(/\D/g, '');
+      if (cleaned.startsWith('0')) {
+        cleaned = '62' + cleaned.slice(1);
+      } else if (!cleaned.startsWith('62') && cleaned.length > 0) {
+        cleaned = '62' + cleaned;
+      }
+      const query = defaultText ? `?text=${encodeURIComponent(defaultText)}` : '';
+      return `https://wa.me/${cleaned || '6281959793678'}${query}`;
+    }
+
+    // Menampilkan pesan notifikasi toast
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const colorClasses = type === 'error'
+        ? 'bg-rose-600 text-white'
+        : 'bg-slate-900 text-white border border-brand-400/30';
+
+      toast.className = `pointer-events-auto px-4 py-3 rounded-2xl shadow-lg text-xs sm:text-sm font-medium flex items-center justify-between gap-3 fade-in ${colorClasses}`;
+      toast.innerHTML = `<span>${escapeHtml(message)}</span>`;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.25s ease';
+        setTimeout(() => toast.remove(), 250);
+      }, 3200);
+    }
+
+    // Escaping HTML untuk mencegah XSS
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    // Menerapkan palet warna biru ke CSS variables
+    function applyThemeColor(themeKey) {
+      const palette = THEME_PALETTES[themeKey] || THEME_PALETTES.royal;
+      const root = document.documentElement;
+      Object.entries(palette).forEach(([varName, hex]) => {
+        root.style.setProperty(varName, hex);
+      });
+    }
+
+    function previewThemeColor(themeKey) {
+      applyThemeColor(themeKey);
+    }
+
+    // Berganti tab utama (beranda / pendataan / pengaturan)
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab-content').forEach((el) => el.classList.add('hidden'));
+      const targetTab = document.getElementById(`tab-${tabName}`);
+      if (targetTab) targetTab.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach((btn) => {
+        const isActive = btn.dataset.tab === tabName;
+        btn.classList.toggle('bg-brand-600', isActive);
+        btn.classList.toggle('text-white', isActive);
+        btn.classList.toggle('shadow-sm', isActive);
+        btn.classList.toggle('text-slate-600', !isActive);
+      });
+    }
+
+    function focusInputNik() {
+      setTimeout(() => {
+        const el = document.getElementById('input-nik');
+        if (el) el.focus();
+      }, 100);
+    }
+
+    // Sinkronisasi seluruh teks identitas, WhatsApp, dan dropdown RT/Status
+    function syncUIWithConfig() {
+      applyThemeColor(config.theme);
+      const waUrl = formatWhatsAppUrl(config.whatsapp);
+      const waInquiryUrl = formatWhatsAppUrl(
+        config.whatsapp,
+        `Halo Admin ${config.villageName}, saya ingin bertanya terkait pendataan warga.`
+      );
+
+      document.title = `${config.villageName} — Portofolio & Sistem Pendataan Warga`;
+      document.getElementById('header-village-name').textContent = config.villageName;
+      document.getElementById('header-village-address').textContent = config.address;
+      document.getElementById('wa-header-btn').href = waUrl;
+      document.getElementById('wa-header-label').textContent = `WA: ${config.whatsapp}`;
+
+      document.getElementById('hero-title').textContent = `Profil & Pendataan Warga ${config.villageName}`;
+      document.getElementById('hero-desc').textContent = config.description;
+      document.getElementById('hero-address').textContent = config.address;
+      document.getElementById('wa-hero-btn').href = waUrl;
+      document.getElementById('wa-hero-label').textContent = `WhatsApp: ${config.whatsapp}`;
+      document.getElementById('wa-card-btn').href = waInquiryUrl;
+
+      document.getElementById('profil-heading').textContent = `Tentang ${config.villageName}`;
+      document.getElementById('profil-about').textContent = config.description;
+      document.getElementById('profil-address').textContent = config.address;
+      document.getElementById('profil-wa').textContent = config.whatsapp;
+
+      document.getElementById('footer-village').textContent = config.villageName;
+      document.getElementById('footer-address').textContent = config.address;
+      document.getElementById('footer-wa').textContent = config.whatsapp;
+      document.getElementById('wa-footer-link').href = waUrl;
+
+      // Isi form pengaturan
+      document.getElementById('set-nama-desa').value = config.villageName;
+      document.getElementById('set-alamat-desa').value = config.address;
+      document.getElementById('set-wa-desa').value = config.whatsapp;
+      document.getElementById('set-deskripsi-desa').value = config.description;
+      document.getElementById('set-tema-biru').value = config.theme || 'royal';
+      document.getElementById('set-daftar-rt').value = config.rtList.join(', ');
+      document.getElementById('set-daftar-status').value = config.statusList.join(', ');
+
+      // Isi dropdown RT & Status di Form Input Warga
+      const selectRt = document.getElementById('input-rt');
+      const currentRtVal = selectRt.value;
+      selectRt.innerHTML = config.rtList
+        .map((rt) => `<option value="${escapeHtml(rt)}">${escapeHtml(rt)}</option>`)
+        .join('');
+      if (config.rtList.includes(currentRtVal)) selectRt.value = currentRtVal;
+
+      const selectStatus = document.getElementById('input-status');
+      const currentStatusVal = selectStatus.value;
+      selectStatus.innerHTML = config.statusList
+        .map((st) => `<option value="${escapeHtml(st)}">${escapeHtml(st)}</option>`)
+        .join('');
+      if (config.statusList.includes(currentStatusVal)) selectStatus.value = currentStatusVal;
+
+      // Isi filter RT di tabel warga
+      const filterRt = document.getElementById('filter-rt');
+      const currentFilter = filterRt.value;
+      filterRt.innerHTML = `<option value="ALL">Semua RT / Dusun</option>` + config.rtList
+        .map((rt) => `<option value="${escapeHtml(rt)}">${escapeHtml(rt)}</option>`)
+        .join('');
+      if ([ 'ALL', ...config.rtList ].includes(currentFilter)) filterRt.value = currentFilter;
+
+      // Set tanggal masuk default hari ini jika kosong
+      const tglMasukInput = document.getElementById('input-tgl-masuk');
+      if (!tglMasukInput.value) {
+        tglMasukInput.value = new Date().toISOString().split('T')[0];
+      }
+    }
+
+    // Memperbarui kartu statistik & sebaran wilayah
+    function updateStats() {
+      const totalAktif = wargaAktif.length;
+      const totalKK = wargaAktif.filter((w) => w.status.toLowerCase().includes('kepala keluarga')).length;
+      const totalLaki = wargaAktif.filter((w) => w.gender === 'Laki-laki').length;
+      const totalPerempuan = wargaAktif.filter((w) => w.gender === 'Perempuan').length;
+      const totalPindah = wargaPindah.length;
+
+      document.getElementById('stat-total-warga').textContent = totalAktif;
+      document.getElementById('stat-kepala-keluarga').textContent = totalKK;
+      document.getElementById('stat-gender').textContent = `${totalLaki} / ${totalPerempuan}`;
+      document.getElementById('stat-warga-pindah').textContent = totalPindah;
+      document.getElementById('badge-pindah-count').textContent = totalPindah;
+
+      // Sebaran per RT
+      const distContainer = document.getElementById('rt-distribution-list');
+      distContainer.innerHTML = config.rtList.map((rt) => {
+        const count = wargaAktif.filter((w) => w.rt === rt).length;
+        const pct = totalAktif > 0 ? Math.round((count / totalAktif) * 100) : 0;
+        return `
+          <div class="p-3.5 rounded-2xl border border-slate-200/80 bg-slate-50/70">
+            <div class="flex items-center justify-between text-xs sm:text-sm font-semibold text-slate-800">
+              <span>${escapeHtml(rt)}</span>
+              <span class="text-brand-700">${count} warga (${pct}%)</span>
+            </div>
+            <div class="w-full h-2 bg-brand-100 rounded-full mt-2 overflow-hidden">
+              <div class="h-full bg-brand-600 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Merender tabel warga aktif
+    function renderWargaTable() {
+      const tbody = document.getElementById('warga-table-body');
+      const emptyEl = document.getElementById('warga-empty-state');
+      const keyword = (document.getElementById('search-warga').value || '').trim().toLowerCase();
+      const selectedRt = document.getElementById('filter-rt').value;
+
+      const filtered = wargaAktif.filter((w) => {
+        const matchRt = selectedRt === 'ALL' || w.rt === selectedRt;
+        const matchSearch = !keyword ||
+          w.nama.toLowerCase().includes(keyword) ||
+          w.nik.toLowerCase().includes(keyword) ||
+          (w.keterangan || '').toLowerCase().includes(keyword) ||
+          w.status.toLowerCase().includes(keyword);
+        return matchRt && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+      tbody.innerHTML = filtered.map((w) => `
+        <tr class="hover:bg-brand-50/40 transition">
+          <td class="py-3.5 px-4">
+            <div class="font-bold text-slate-900">${escapeHtml(w.nama)}</div>
+            <div class="text-xs text-slate-500 font-mono">NIK: ${escapeHtml(w.nik)}</div>
+            ${w.keterangan ? `<div class="text-xs text-brand-700 mt-0.5">${escapeHtml(w.keterangan)}</div>` : ''}
+          </td>
+          <td class="py-3.5 px-3 text-xs sm:text-sm">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold ${w.gender === 'Laki-laki' ? 'bg-blue-50 text-blue-700' : 'bg-pink-50 text-pink-700'}">
+              ${escapeHtml(w.gender)}
+            </span>
+            <div class="text-xs text-slate-500 mt-1">${escapeHtml(w.tglLahir || '-')}</div>
+          </td>
+          <td class="py-3.5 px-3 text-xs sm:text-sm font-medium text-slate-700">
+            ${escapeHtml(w.rt)}
+          </td>
+          <td class="py-3.5 px-3">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200">
+              ${escapeHtml(w.status)}
+            </span>
+          </td>
+          <td class="py-3.5 px-3 text-xs text-slate-600">
+            ${escapeHtml(w.tglMasuk || '-')}
+          </td>
+          <td class="py-3.5 px-4 text-right">
+            <button type="button" onclick="openPindahModal('${escapeHtml(w.id)}')"
+              class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold transition">
+              <span>Warga Pindah</span>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Merender tabel riwayat warga pindah
+    function renderPindahTable() {
+      const tbody = document.getElementById('pindah-table-body');
+      const emptyEl = document.getElementById('pindah-empty-state');
+
+      if (wargaPindah.length === 0) {
+        tbody.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      emptyEl.classList.add('hidden');
+      tbody.innerHTML = wargaPindah.map((p) => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-3 px-4">
+            <div class="font-bold text-slate-800">${escapeHtml(p.nama)}</div>
+            <div class="text-xs text-slate-500 font-mono">NIK: ${escapeHtml(p.nik)}</div>
+          </td>
+          <td class="py-3 px-3 text-xs sm:text-sm text-slate-700">${escapeHtml(p.rt)}</td>
+          <td class="py-3 px-3 text-xs sm:text-sm text-slate-600">${escapeHtml(p.alasanPindah || 'Pindah domisili')}</td>
+          <td class="py-3 px-3 text-xs text-slate-500">${escapeHtml(p.tglPindah)}</td>
+          <td class="py-3 px-4 text-right space-x-1.5 whitespace-nowrap">
+            <button type="button" onclick="restoreWargaPindah('${escapeHtml(p.id)}')"
+              class="px-2.5 py-1.5 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold transition">
+              Pulihkan
+            </button>
+            <button type="button" onclick="deletePindahPermanent('${escapeHtml(p.id)}')"
+              class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition">
+              Hapus
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Menambah warga baru dari formulir
+    function handleAddWarga(event) {
+      event.preventDefault();
+
+      const nik = document.getElementById('input-nik').value.trim();
+      const nama = document.getElementById('input-nama').value.trim();
+      const gender = document.getElementById('input-gender').value;
+      const tglLahir = document.getElementById('input-tgl-lahir').value;
+      const rt = document.getElementById('input-rt').value;
+      const status = document.getElementById('input-status').value;
+      const tglMasuk = document.getElementById('input-tgl-masuk').value;
+      const keterangan = document.getElementById('input-keterangan').value.trim();
+
+      if (!nik || !nama) {
+        showToast('NIK dan Nama Lengkap wajib diisi.', 'error');
+        return;
+      }
+
+      const duplicate = wargaAktif.some((w) => w.nik === nik);
+      if (duplicate) {
+        showToast('NIK tersebut sudah terdaftar pada warga aktif.', 'error');
+        return;
+      }
+
+      const newWarga = {
+        id: 'w-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+        nik,
+        nama,
+        gender,
+        tglLahir,
+        rt,
+        status,
+        tglMasuk,
+        keterangan
+      };
+
+      wargaAktif.unshift(newWarga);
+      saveAll();
+      updateStats();
+      renderWargaTable();
+
+      document.getElementById('form-warga-baru').reset();
+      document.getElementById('input-tgl-masuk').value = new Date().toISOString().split('T')[0];
+      showToast(`Warga "${nama}" berhasil ditambahkan.`);
+    }
+
+    // Membuka modal konfirmasi warga pindah
+    function openPindahModal(id) {
+      const target = wargaAktif.find((w) => w.id === id);
+      if (!target) return;
+      pendingPindahId = id;
+      document.getElementById('pindah-target-nama').textContent = target.nama;
+      document.getElementById('pindah-target-nik').textContent = `NIK: ${target.nik} • ${target.rt}`;
+      document.getElementById('pindah-alasan').value = '';
+
+      const modal = document.getElementById('modal-pindah');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closePindahModal() {
+      pendingPindahId = null;
+      const modal = document.getElementById('modal-pindah');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    // Memindahkan warga aktif ke arsip warga pindah
+    function confirmPindahWarga() {
+      if (!pendingPindahId) return;
+      const idx = wargaAktif.findIndex((w) => w.id === pendingPindahId);
+      if (idx === -1) return;
+
+      const [moved] = wargaAktif.splice(idx, 1);
+      const alasan = document.getElementById('pindah-alasan').value.trim() || 'Pindah domisili';
+      wargaPindah.unshift({
+        ...moved,
+        alasanPindah: alasan,
+        tglPindah: new Date().toISOString().split('T')[0]
+      });
+
+      saveAll();
+      updateStats();
+      renderWargaTable();
+      renderPindahTable();
+      closePindahModal();
+      showToast(`"${moved.nama}" dipindahkan ke arsip warga pindah.`);
+    }
+
+    // Memulihkan warga dari arsip pindah ke warga aktif
+    function restoreWargaPindah(id) {
+      const idx = wargaPindah.findIndex((p) => p.id === id);
+      if (idx === -1) return;
+      const [restored] = wargaPindah.splice(idx, 1);
+      delete restored.alasanPindah;
+      delete restored.tglPindah;
+      wargaAktif.unshift(restored);
+
+      saveAll();
+      updateStats();
+      renderWargaTable();
+      renderPindahTable();
+      showToast(`"${restored.nama}" dipulihkan sebagai warga aktif.`);
+    }
+
+    // Menghapus permanen data dari arsip pindah
+    function deletePindahPermanent(id) {
+      wargaPindah = wargaPindah.filter((p) => p.id !== id);
+      saveAll();
+      updateStats();
+      renderPindahTable();
+      showToast('Data arsip pindah dihapus permanen.');
+    }
+
+    // Menyimpan pengaturan profil & kontak desa
+    function handleSaveSettings(event) {
+      event.preventDefault();
+      config.villageName = document.getElementById('set-nama-desa').value.trim() || DEFAULT_CONFIG.villageName;
+      config.address = document.getElementById('set-alamat-desa').value.trim() || DEFAULT_CONFIG.address;
+      config.whatsapp = document.getElementById('set-wa-desa').value.trim() || DEFAULT_CONFIG.whatsapp;
+      config.description = document.getElementById('set-deskripsi-desa').value.trim() || DEFAULT_CONFIG.description;
+      config.theme = document.getElementById('set-tema-biru').value || 'royal';
+
+      saveAll();
+      syncUIWithConfig();
+      showToast('Pengaturan profil desa & WhatsApp berhasil disimpan.');
+    }
+
+    // Menyimpan daftar RT/Dusun dan Status Keluarga kustom
+    function handleSaveLists() {
+      const rtRaw = document.getElementById('set-daftar-rt').value;
+      const statusRaw = document.getElementById('set-daftar-status').value;
+
+      const parsedRt = rtRaw.split(',').map((s) => s.trim()).filter(Boolean);
+      const parsedStatus = statusRaw.split(',').map((s) => s.trim()).filter(Boolean);
+
+      if (parsedRt.length === 0 || parsedStatus.length === 0) {
+        showToast('Daftar RT/Dusun dan Status tidak boleh kosong.', 'error');
+        return;
+      }
+
+      config.rtList = parsedRt;
+      config.statusList = parsedStatus;
+      saveAll();
+      syncUIWithConfig();
+      updateStats();
+      showToast('Daftar RT/Dusun dan Status keluarga diperbarui.');
+    }
+
+    // Ekspor data warga aktif ke file CSV
+    function exportCSV() {
+      const headers = ['NIK', 'Nama Lengkap', 'Jenis Kelamin', 'Tanggal Lahir', 'RT / Dusun', 'Status Keluarga', 'Tanggal Masuk', 'Keterangan'];
+      const rows = wargaAktif.map((w) => [
+        w.nik, w.nama, w.gender, w.tglLahir, w.rt, w.status, w.tglMasuk, w.keterangan || ''
+      ]);
+
+      const csvContent = [headers, ...rows]
+        .map((row) => row.map((cell) => `"${String(cell || '').replace(/"/g, '""')}"`).join(','))
+        .join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `data-warga-${config.villageName.toLowerCase().replace(/\s+/g, '-')}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('File CSV warga aktif berhasil diunduh.');
+    }
+
+    // Ekspor seluruh data (konfigurasi, warga aktif, warga pindah) ke JSON
+    function exportJSON() {
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        config,
+        wargaAktif,
+        wargaPindah
+      };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-desa-sungai-taib.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Cadangan JSON berhasil diunduh.');
+    }
+
+    // Impor data dari file JSON
+    function importJSON(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.config) config = { ...DEFAULT_CONFIG, ...parsed.config };
+          if (Array.isArray(parsed.wargaAktif)) wargaAktif = parsed.wargaAktif;
+          if (Array.isArray(parsed.wargaPindah)) wargaPindah = parsed.wargaPindah;
+          saveAll();
+          syncUIWithConfig();
+          updateStats();
+          renderWargaTable();
+          renderPindahTable();
+          showToast('Data JSON berhasil diimpor.');
+        } catch (err) {
+          showToast('Format file JSON tidak valid.', 'error');
+        }
+        event.target.value = '';
+      };
+      reader.readAsText(file);
+    }
+
+    function openResetModal() {
+      const modal = document.getElementById('modal-reset');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeResetModal() {
+      const modal = document.getElementById('modal-reset');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function confirmResetAll() {
+      config = structuredClone(DEFAULT_CONFIG);
+      wargaAktif = structuredClone(DEFAULT_WARGA);
+      wargaPindah = [];
+      saveAll();
+      syncUIWithConfig();
+      updateStats();
+      renderWargaTable();
+      renderPindahTable();
+      closeResetModal();
+      showToast('Semua data dikembalikan ke bawaan Desa Sungai Taib.');
+    }
+
+    // Inisialisasi saat halaman dimuat
+    document.addEventListener('DOMContentLoaded', () => {
+      syncUIWithConfig();
+      updateStats();
+      renderWargaTable();
+      renderPindahTable();
+    });
+  </script>
+</body>
+</html>
